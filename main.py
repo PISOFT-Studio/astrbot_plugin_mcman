@@ -7,8 +7,6 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from astrbot.api import AstrBotConfig  # 配置管理
 
-wc = ""
-
 
 class AsyncRcon:
     def __init__(self, host: str, port: int, password: str):
@@ -53,7 +51,9 @@ def strip_mc_color(text: str) -> str:
     return re.sub(r"§.", "", text)
 
 
-async def rcon_whitelist(host, port, password, o: str, mcname: str = "") -> str:
+async def rcon_whitelist(
+    host, port, password, o: str, mcname: str = "", wc: str = "whitelist"
+) -> str:
     """异步执行 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
     await rcon.connect()
@@ -182,8 +182,7 @@ class MyPlugin(Star):
         super().__init__(context)
         self.config = config
         self.whitelist_command = self.config.get("whitelist_command")
-        wc = self.whitelist_command
-        logger.info(f"whitelist_command: {wc}")
+        logger.info(f"whitelist_command: {self.whitelist_command}")
         # 管理员 QQ
         self.admin_qqs = set(self.config.get("admin_qqs", []))
         # RCON 配置
@@ -215,12 +214,17 @@ class MyPlugin(Star):
 
         try:
             resp = await rcon_whitelist(
-                self.rcon_host, self.rcon_port, self.rcon_password, o, mcname
+                self.rcon_host,
+                self.rcon_port,
+                self.rcon_password,
+                o,
+                mcname,
+                self.whitelist_command,
             )
             cresp = strip_mc_color(resp)
             logger.info(f"RCON 执行结果: {resp}")
             yield event.plain_result(
-                f"你好, {named}, 已尝试执行 `{wc} {o} {mcname}`\n\n服务器返回：\n{cresp}"
+                f"你好, {named}, 已尝试执行 `{self.whitelist_command} {o} {mcname}`\n\n服务器返回：\n{cresp}"
             )
         except Exception as e:
             logger.error(f"RCON 执行失败: {e}")
