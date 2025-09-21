@@ -7,6 +7,8 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from astrbot.api import AstrBotConfig  # 配置管理
 
+wc = ""
+
 
 class AsyncRcon:
     def __init__(self, host: str, port: int, password: str):
@@ -57,9 +59,9 @@ async def rcon_whitelist(host, port, password, o: str, mcname: str = "") -> str:
     await rcon.connect()
     try:
         if mcname:
-            resp = await rcon.send_cmd(f"swl {o} {mcname}")
+            resp = await rcon.send_cmd(f"{wc} {o} {mcname}")
         else:
-            resp = await rcon.send_cmd(f"swl {o}")
+            resp = await rcon.send_cmd(f"{wc} {o}")
         return resp
     finally:
         await rcon.close()
@@ -179,6 +181,8 @@ class MyPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.config = config
+        self.whitelist_command = self.config.get("whitelist_command")
+        wc = self.whitelist_command
         # 管理员 QQ
         self.admin_qqs = set(self.config.get("admin_qqs", []))
         # RCON 配置
@@ -189,9 +193,7 @@ class MyPlugin(Star):
     async def initialize(self):
         logger.info("mcman plugin by kdj")
 
-    @filter.command(
-        "mcwl", desc="MC 白名单管理 (list/add/remove)", alias={"mcwhitelist"}
-    )
+    @filter.command("mcwl", desc="MC 白名单管理", alias={"mcwhitelist"})
     async def mcwl(self, event: AstrMessageEvent, o: str, mcname: str = ""):
         """MC 白名单管理命令"""
         user_name = event.get_sender_name()
@@ -204,11 +206,11 @@ class MyPlugin(Star):
             return
 
         # 参数校验
-        if o not in ("list", "add", "remove"):
-            yield event.plain_result(
-                f"你好, {named}, 不支持的操作 `{o}`，可选: list, add, remove"
-            )
-            return
+        # if o not in ("list", "add", "remove"):
+        #     yield event.plain_result(
+        #         f"你好, {named}, 不支持的操作 `{o}`，可选: list, add, remove"
+        #     )
+        #     return
 
         try:
             resp = await rcon_whitelist(

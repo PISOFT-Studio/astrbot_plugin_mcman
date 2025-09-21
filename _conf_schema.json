@@ -15,6 +15,12 @@
     "type": "string",
     "default": ""
   },
+  "whitelist_command": {
+    "description": "whitelist命令名",
+    "type": "string",
+    "default": "whitelist",
+    "hint": "原版为whitelist, 可改成swl等白名单插件"
+  },
   "admin_qqs": {
     "description": "允许使用敏感命令的 QQ 列表",
     "type": "list",
