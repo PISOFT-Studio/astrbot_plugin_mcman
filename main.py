@@ -423,7 +423,7 @@ class MyPlugin(Star):
             yield event.plain_result(f"你好, {named}, 操作失败：{e}")
 
     @filter.command("mcbroadcast", desc="MC 广播消息", alias={"mcb","mcbc"})
-    async def mcsay(self, event: AstrMessageEvent, text: str = ""):
+    async def mcbroadcast(self, event: AstrMessageEvent, text: str = ""):
         """MC 广播消息命令"""
         user_name = event.get_sender_name()
         sender_qq = event.get_sender_id()
