@@ -1,4 +1,4 @@
-# helloworld
+# astrbot_plugin_mcwl
 
 AstrBot 插件模板
 
