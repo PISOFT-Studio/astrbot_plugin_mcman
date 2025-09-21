@@ -356,7 +356,9 @@ class MyPlugin(Star):
         user_name = event.get_sender_name()
         sender_qq = event.get_sender_id()
         named = f"{user_name}({sender_qq})"
-
+        if not text:
+            yield event.plain_result(f"你好, {named}, 请输入信息!")
+            return
         try:
             resp = await rcon_say(self.rcon_host, self.rcon_port, self.rcon_password, text, named)
             cresp = strip_mc_color(resp)
