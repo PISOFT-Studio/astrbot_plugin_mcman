@@ -2,17 +2,13 @@ from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from mcrcon import MCRcon
-import asyncio
 
 
-async def add_whitelist_async(mc_host, mc_port, rcon_pwd, mcname: str):
-    def _do_rcon():
-        with MCRcon(mc_host, rcon_pwd, port=mc_port) as mcr:
-            resp = mcr.command(f"swl add {mcname}")
-            return resp
-
-    # 把同步的 rcon 调用放到线程池里跑
-    return await asyncio.to_thread(_do_rcon)
+def add_whitelist(mc_host, mc_port, rcon_pwd, mcname: str):
+    """同步执行 RCON 命令"""
+    with MCRcon(mc_host, rcon_pwd, port=mc_port) as mcr:
+        resp = mcr.command(f"whitelist add {mcname}")
+        return resp
 
 
 @register("mcwl", "卡带酱", "mcwl", "1.0.0")
@@ -33,9 +29,9 @@ class MyPlugin(Star):
             yield event.plain_result(f"你好, {user_name}, 您似乎没有权限 :(")
             return
 
-        # 执行 rcon 白名单添加
+        # 执行 rcon 白名单添加（同步）
         try:
-            resp = await add_whitelist_async("host", 25575, "password", mcname)
+            resp = add_whitelist("host", 25575, "password", mcname)
             logger.info(f"RCON执行结果: {resp}")
             yield event.plain_result(
                 f"你好, {user_name}, 已尝试对白名单添加 {mcname}，服务器返回: {resp}"
