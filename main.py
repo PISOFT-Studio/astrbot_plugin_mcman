@@ -65,13 +65,13 @@ async def rcon_whitelist(host, port, password, o: str, mcname: str = "") -> str:
         await rcon.close()
 
 
-async def rcon_ban(host, port, password, mcname: str = "") -> str:
+async def rcon_ban(host, port, password, mcname: str = "", reason: str = "") -> str:
     """异步执行 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
     await rcon.connect()
     try:
         if mcname:
-            resp = await rcon.send_cmd(f"ban {mcname}")
+            resp = await rcon.send_cmd(f"ban {mcname} {reason}")
         else:
             resp = await rcon.send_cmd(f"ban")
         return resp
@@ -213,7 +213,7 @@ class MyPlugin(Star):
             yield event.plain_result(f"你好, {named}, 操作失败：{e}")
 
     @filter.command("mcban", desc="MC 黑名单添加")
-    async def mcban(self, event: AstrMessageEvent, mcname: str = ""):
+    async def mcban(self, event: AstrMessageEvent, mcname: str = "", reason: str = ""):
         """MC 黑名单添加命令"""
         user_name = event.get_sender_name()
         sender_qq = event.get_sender_id()
@@ -225,11 +225,11 @@ class MyPlugin(Star):
             return
 
         try:
-            resp = await rcon_ban(self.rcon_host, self.rcon_port, self.rcon_password, mcname)
+            resp = await rcon_ban(self.rcon_host, self.rcon_port, self.rcon_password, mcname, reason)
             cresp = strip_mc_color(resp)
             logger.info(f"RCON 执行结果: {resp}")
             yield event.plain_result(
-                f"你好, {named}, 已尝试执行 `ban {mcname}`\n\n服务器返回：\n{cresp}"
+                f"你好, {named}, 已尝试执行 `ban {mcname} {reason}`\n\n服务器返回：\n{cresp}"
             )
         except Exception as e:
             logger.error(f"RCON 执行失败: {e}")
