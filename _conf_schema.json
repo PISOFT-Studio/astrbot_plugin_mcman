@@ -1,0 +1,26 @@
+{
+  "rcon_host": {
+    "description": "MC 服务器 RCON 地址或域名",
+    "type": "string",
+    "default": "localhost",
+    "hint": "例如 127.0.0.1 或者 mc.example.com"
+  },
+  "rcon_port": {
+    "description": "RCON 端口号",
+    "type": "int",
+    "default": 25575
+  },
+  "rcon_password": {
+    "description": "RCON 密码",
+    "type": "string",
+    "default": ""
+  },
+  "admin_qqs": {
+    "description": "允许使用白名单命令的 QQ 列表",
+    "type": "list",
+    "items": {
+      "type": "string"
+    },
+    "default": []
+  }
+}
