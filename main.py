@@ -267,7 +267,7 @@ class MyPlugin(Star):
         #     return
 
         try:
-            resp = await rcon_banlist(self.rcon_host, self.rcon_port, self.rcon_password)
+            resp = await rcon_list(self.rcon_host, self.rcon_port, self.rcon_password)
             cresp = strip_mc_color(resp)
             logger.info(f"RCON 执行结果: {resp}")
             yield event.plain_result(
