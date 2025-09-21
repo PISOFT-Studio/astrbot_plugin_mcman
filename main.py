@@ -129,8 +129,8 @@ async def rcon_say(
     finally:
         await rcon.close()
 
-async def rcon_broadcast(
-    host, port, password, text: str = "") -> str:
+
+async def rcon_broadcast(host, port, password, text: str = "") -> str:
     """异步执行 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
     await rcon.connect()
@@ -422,7 +422,7 @@ class MyPlugin(Star):
             logger.error(f"RCON 执行失败: {e}")
             yield event.plain_result(f"你好, {named}, 操作失败：{e}")
 
-    @filter.command("mcbroadcast", desc="MC 广播消息", alias={"mcb","mcbc"})
+    @filter.command("mcbroadcast", desc="MC 广播消息", alias={"mcb", "mcbc"})
     async def mcbroadcast(self, event: AstrMessageEvent, text: str = ""):
         """MC 广播消息命令"""
         user_name = event.get_sender_name()
