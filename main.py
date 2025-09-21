@@ -172,7 +172,9 @@ async def rcon_tempban(
         await rcon.close()
 
 
-@register("MC管理器", "卡带酱", "一个基于RCON协议的MC服务器管理器插件", "1.0.2")
+@register(
+    "astrbot_plugin_mcman", "卡带酱", "一个基于RCON协议的MC服务器管理器插件", "1.0.2"
+)
 class MyPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
