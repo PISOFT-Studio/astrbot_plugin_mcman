@@ -45,8 +45,11 @@ class AsyncRcon:
         body = data[8:-2].decode(errors="ignore")
         return req_id, ptype, body
 
+
 def strip_mc_color(text: str) -> str:
     return re.sub(r"§.", "", text)
+
+
 async def rcon_whitelist(host, port, password, o: str, mcname: str = "") -> str:
     """异步执行 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
@@ -74,6 +77,7 @@ async def rcon_ban(host, port, password, mcname: str = "") -> str:
     finally:
         await rcon.close()
 
+
 async def rcon_unban(host, port, password, mcname: str = "") -> str:
     """异步执行 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
@@ -86,6 +90,7 @@ async def rcon_unban(host, port, password, mcname: str = "") -> str:
         return resp
     finally:
         await rcon.close()
+
 
 async def rcon_kick(host, port, password, mcname: str = "", reason: str = "") -> str:
     """异步执行 RCON 命令"""
@@ -100,6 +105,7 @@ async def rcon_kick(host, port, password, mcname: str = "", reason: str = "") ->
     finally:
         await rcon.close()
 
+
 async def rcon_banlist(host, port, password) -> str:
     """异步执行 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
@@ -110,6 +116,7 @@ async def rcon_banlist(host, port, password) -> str:
     finally:
         await rcon.close()
 
+
 async def rcon_list(host, port, password) -> str:
     """异步执行 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
@@ -119,6 +126,7 @@ async def rcon_list(host, port, password) -> str:
         return resp
     finally:
         await rcon.close()
+
 
 async def rcon_tempban(host, port, password, mcname: str, time: str, reason: str) -> str:
     """异步执行 RCON 命令"""
@@ -322,7 +330,6 @@ class MyPlugin(Star):
         except Exception as e:
             logger.error(f"RCON 执行失败: {e}")
             yield event.plain_result(f"你好, {named}, 操作失败：{e}")
-
 
     async def terminate(self):
         logger.info("mcman plugin stopped")
