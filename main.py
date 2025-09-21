@@ -1,4 +1,5 @@
 import asyncio
+import json
 import struct
 import re
 from astrbot.api.event import filter, AstrMessageEvent
@@ -101,6 +102,23 @@ async def rcon_kick(host, port, password, mcname: str = "", reason: str = "") ->
             resp = await rcon.send_cmd(f"kick {mcname} {reason}")
         else:
             resp = await rcon.send_cmd(f"kick")
+        return resp
+    finally:
+        await rcon.close()
+
+async def rcon_say(host, port, password, text: str = "",named: str = "Unknown QQ (0)") -> str:
+    """异步执行 RCON 命令"""
+    rcon = AsyncRcon(host, port, password)
+    await rcon.connect()
+    try:
+        # 构造 tellraw JSON
+        message = [
+            {"text": f"[{named}] ", "color": "green"},
+            {"text": "说: ", "color": "white"},
+            {"text": text, "color": "yellow"}
+        ]
+        cmd = f"tellraw @a {json.dumps(message, ensure_ascii=False)}"
+        resp = await rcon.send_cmd(cmd)
         return resp
     finally:
         await rcon.close()
@@ -326,6 +344,24 @@ class MyPlugin(Star):
             logger.info(f"RCON 执行结果: {resp}")
             yield event.plain_result(
                 f"你好, {named}, 已尝试执行 `tempban {mcname} {time} {reason}`\n\n服务器返回：\n{cresp}"
+            )
+        except Exception as e:
+            logger.error(f"RCON 执行失败: {e}")
+            yield event.plain_result(f"你好, {named}, 操作失败：{e}")
+
+    @filter.command("mcsay", desc="MC 说话", alias={"mcs"})
+    async def mcsay(self, event: AstrMessageEvent, text: str = ""):
+        """MC 说话命令"""
+        user_name = event.get_sender_name()
+        sender_qq = event.get_sender_id()
+        named = f"{user_name}({sender_qq})"
+
+        try:
+            resp = await rcon_say(self.rcon_host, self.rcon_port, self.rcon_password, text, named)
+            cresp = strip_mc_color(resp)
+            logger.info(f"RCON 执行结果: {resp}")
+            yield event.plain_result(
+                f"你好, {named}, 您的信息已传到服务器！"
             )
         except Exception as e:
             logger.error(f"RCON 执行失败: {e}")
