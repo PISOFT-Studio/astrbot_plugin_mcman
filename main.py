@@ -87,13 +87,13 @@ async def rcon_unban(host, port, password, mcname: str = "") -> str:
     finally:
         await rcon.close()
 
-async def rcon_kick(host, port, password, mcname: str = "") -> str:
+async def rcon_kick(host, port, password, mcname: str = "", reason: str = "") -> str:
     """异步执行 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
     await rcon.connect()
     try:
         if mcname:
-            resp = await rcon.send_cmd(f"kick {mcname}")
+            resp = await rcon.send_cmd(f"kick {mcname} {reason}")
         else:
             resp = await rcon.send_cmd(f"kick")
         return resp
@@ -106,6 +106,16 @@ async def rcon_banlist(host, port, password) -> str:
     await rcon.connect()
     try:
         resp = await rcon.send_cmd(f"banlist")
+        return resp
+    finally:
+        await rcon.close()
+
+async def rcon_list(host, port, password) -> str:
+    """异步执行 RCON 命令"""
+    rcon = AsyncRcon(host, port, password)
+    await rcon.connect()
+    try:
+        resp = await rcon.send_cmd(f"list")
         return resp
     finally:
         await rcon.close()
@@ -244,8 +254,31 @@ class MyPlugin(Star):
             logger.error(f"RCON 执行失败: {e}")
             yield event.plain_result(f"你好, {named}, 操作失败：{e}")
 
+    @filter.command("mclist", desc="MC 查看在线玩家", alias={"mcl"})
+    async def mclist(self, event: AstrMessageEvent):
+        """MC 查看在线玩家命令"""
+        user_name = event.get_sender_name()
+        sender_qq = event.get_sender_id()
+        named = f"{user_name}({sender_qq})"
+
+        # # 权限检查
+        # if str(sender_qq) not in self.admin_qqs:
+        #     yield event.plain_result(f"你好, {named}, 您没有权限执行此操作 :(")
+        #     return
+
+        try:
+            resp = await rcon_banlist(self.rcon_host, self.rcon_port, self.rcon_password)
+            cresp = strip_mc_color(resp)
+            logger.info(f"RCON 执行结果: {resp}")
+            yield event.plain_result(
+                f"你好, {named}, 已尝试执行 `list`\n\n服务器返回：\n{cresp}"
+            )
+        except Exception as e:
+            logger.error(f"RCON 执行失败: {e}")
+            yield event.plain_result(f"你好, {named}, 操作失败：{e}")
+
     @filter.command("mckick", desc="MC 踢出指定玩家", alias={"mck"})
-    async def mckick(self, event: AstrMessageEvent, mcname: str = ""):
+    async def mckick(self, event: AstrMessageEvent, mcname: str = "", reason: str = ""):
         """MC 踢出指定玩家命令"""
         user_name = event.get_sender_name()
         sender_qq = event.get_sender_id()
@@ -261,13 +294,13 @@ class MyPlugin(Star):
             cresp = strip_mc_color(resp)
             logger.info(f"RCON 执行结果: {resp}")
             yield event.plain_result(
-                f"你好, {named}, 已尝试执行 `kick {mcname}`\n\n服务器返回：\n{cresp}"
+                f"你好, {named}, 已尝试执行 `kick {mcname} {reason}`\n\n服务器返回：\n{cresp}"
             )
         except Exception as e:
             logger.error(f"RCON 执行失败: {e}")
             yield event.plain_result(f"你好, {named}, 操作失败：{e}")
 
-    @filter.command("mctempban", desc="MC 黑名单移除", alias={"mctb"})
+    @filter.command("mctempban", desc="MC 临时黑名单", alias={"mctb"})
     async def mctempban(self, event: AstrMessageEvent, mcname: str = "", time: str = "", reason: str = ""):
         """MC 临时黑名单命令"""
         user_name = event.get_sender_name()
