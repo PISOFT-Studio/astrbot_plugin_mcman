@@ -16,7 +16,7 @@
     "default": ""
   },
   "admin_qqs": {
-    "description": "允许使用白名单命令的 QQ 列表",
+    "description": "允许使用敏感命令的 QQ 列表",
     "type": "list",
     "items": {
       "type": "string"

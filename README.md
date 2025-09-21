@@ -1,8 +1,16 @@
-# astrbot_plugin_mcwl
+## astrbot_plugin_mcman
 
-AstrBot 插件模板
+# MC管理器
 
-A template plugin for AstrBot plugin feature
+### 一个基于RCON协议的MC服务器管理器插件
+
+/mcwl 相当于在游戏中执行whitelist {option} {mcname(可选)}
+
+/mcban 相当于在游戏中执行ban {mcname}
+
+/mcpardon 相当于在游戏中执行pardon {mcname}
+
+/mcbanlist 相当于在游戏中执行banlist
 
 # 支持
 
