@@ -183,6 +183,7 @@ class MyPlugin(Star):
         self.config = config
         self.whitelist_command = self.config.get("whitelist_command")
         wc = self.whitelist_command
+        logger.info(f"whitelist_command: {wc}")
         # 管理员 QQ
         self.admin_qqs = set(self.config.get("admin_qqs", []))
         # RCON 配置
@@ -219,7 +220,7 @@ class MyPlugin(Star):
             cresp = strip_mc_color(resp)
             logger.info(f"RCON 执行结果: {resp}")
             yield event.plain_result(
-                f"你好, {named}, 已尝试执行 `whitelist {o} {mcname}`\n\n服务器返回：\n{cresp}"
+                f"你好, {named}, 已尝试执行 `{wc} {o} {mcname}`\n\n服务器返回：\n{cresp}"
             )
         except Exception as e:
             logger.error(f"RCON 执行失败: {e}")
