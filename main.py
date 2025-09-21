@@ -114,7 +114,7 @@ async def rcon_say(host, port, password, text: str = "",named: str = "Unknown QQ
         # 构造 tellraw JSON
         message = [
             {"text": f"(QQ消息) ", "color": "aqua"},
-            {"text": f"[{named}] ", "color": "green","underlined":True},
+            {"text": f"<{named}> ", "color": "green","underlined":True},
             {"text": "说: ", "color": "white"},
             {"text": text, "color": "yellow"}
         ]
