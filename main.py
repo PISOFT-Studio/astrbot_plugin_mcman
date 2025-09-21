@@ -119,8 +119,26 @@ async def rcon_say(
         # 构造 tellraw JSON
         message = [
             {"text": f"(QQ消息) ", "color": "aqua"},
-            {"text": f"<{named}> ", "color": "green", "underlined": True},
-            {"text": "说: ", "color": "white"},
+            {"text": f"<{named}>", "color": "green", "underlined": True},
+            {"text": " 说: ", "color": "white"},
+            {"text": text, "color": "yellow"},
+        ]
+        cmd = f"tellraw @a {json.dumps(message, ensure_ascii=False)}"
+        resp = await rcon.send_cmd(cmd)
+        return resp
+    finally:
+        await rcon.close()
+
+async def rcon_broadcast(
+    host, port, password, text: str = "") -> str:
+    """异步执行 RCON 命令"""
+    rcon = AsyncRcon(host, port, password)
+    await rcon.connect()
+    try:
+        # 构造 tellraw JSON
+        message = [
+            {"text": f"<管理员广播消息>", "color": "green", "underlined": True},
+            {"text": " ", "color": "white"},
             {"text": text, "color": "yellow"},
         ]
         cmd = f"tellraw @a {json.dumps(message, ensure_ascii=False)}"
@@ -400,6 +418,30 @@ class MyPlugin(Star):
             cresp = strip_mc_color(resp)
             logger.info(f"RCON 执行结果: {resp}")
             yield event.plain_result(f"你好, {named}, 您的信息已传到服务器！")
+        except Exception as e:
+            logger.error(f"RCON 执行失败: {e}")
+            yield event.plain_result(f"你好, {named}, 操作失败：{e}")
+
+    @filter.command("mcbroadcast", desc="MC 广播消息", alias={"mcb","mcbc"})
+    async def mcsay(self, event: AstrMessageEvent, text: str = ""):
+        """MC 广播消息命令"""
+        user_name = event.get_sender_name()
+        sender_qq = event.get_sender_id()
+        named = f"{user_name}({sender_qq})"
+        # 权限检查
+        if str(sender_qq) not in self.admin_qqs:
+            yield event.plain_result(f"你好, {named}, 您没有权限执行此操作 :(")
+            return
+        if not text:
+            yield event.plain_result(f"你好, {named}, 请输入广播信息!")
+            return
+        try:
+            resp = await rcon_broadcast(
+                self.rcon_host, self.rcon_port, self.rcon_password, text
+            )
+            cresp = strip_mc_color(resp)
+            logger.info(f"RCON 执行结果: {resp}")
+            yield event.plain_result(f"你好, {named}, 您的广播已下发！")
         except Exception as e:
             logger.error(f"RCON 执行失败: {e}")
             yield event.plain_result(f"你好, {named}, 操作失败：{e}")
