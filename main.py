@@ -1,10 +1,12 @@
 import asyncio
 import json
 import struct
+import os
 import re
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
+from astrbot.api.star import StarTools
 from astrbot.api import AstrBotConfig  # 配置管理
 
 
@@ -74,7 +76,21 @@ class MyPlugin(Star):
         self.rcon_host = self.config.get("rcon_host")
         self.rcon_port = self.config.get("rcon_port")
         self.rcon_password = self.config.get("rcon_password")
+        # 申请白名单功能
+        self.enable_apply_whitelist = self.config.get("enable_apply_whitelist", False)
+        self.plugin_data_dir = StarTools.get_data_dir("astrbot_plugin_mcman")
+        self.apply_file = os.path.join(self.plugin_data_dir, "apply_whitelist.json")
+        self.apply_data = self._load_apply_data()
 
+    def _load_apply_data(self):
+        if os.path.exists(self.apply_file):
+            with open(self.apply_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return {}
+
+    def _save_apply_data(self):
+        with open(self.apply_file, "w", encoding="utf-8") as f:
+            json.dump(self.apply_data, f, ensure_ascii=False, indent=2)
     async def initialize(self):
         logger.info("mcman plugin by kdj")
 
@@ -202,5 +218,32 @@ class MyPlugin(Star):
         async for msg in self.execute_and_reply(event, command, "广播消息"):
             yield msg
 
+    @filter.command("wantwl", desc="申请MC白名单")
+    async def wantwl(self, event: AstrMessageEvent, mcname: str = ""):
+        if not self.enable_apply_whitelist:
+            yield event.plain_result("抱歉，白名单申请功能未开启。")
+            return
+        if not mcname:
+            yield event.plain_result("请输入要绑定的MC用户名。")
+            return
+
+        qqid = str(event.get_sender_id())
+        if qqid in self.apply_data:
+            yield event.plain_result(
+                f"你已经绑定过MC账号 `{self.apply_data[qqid]}`，不能重复申请。"
+            )
+            return
+
+        # 调用RCON执行
+        command = f"{self.whitelist_command} add {mcname}"
+        try:
+            resp = await rcon_command(self.rcon_host, self.rcon_port, self.rcon_password, command)
+            self.apply_data[qqid] = mcname
+            self._save_apply_data()
+            yield event.plain_result(
+                f"成功为你绑定MC账号 `{mcname}` 并加入白名单！\n服务器返回：{strip_mc_color(resp)}"
+            )
+        except Exception as e:
+            yield event.plain_result(f"申请失败：{e}")
     async def terminate(self):
         logger.info("mcman plugin stopped")

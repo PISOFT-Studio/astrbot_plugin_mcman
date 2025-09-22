@@ -28,5 +28,11 @@
       "type": "string"
     },
     "default": []
+  },
+  "enable_apply_whitelist": {
+    "description": "是否开启玩家自主申请白名单",
+    "type": "bool",
+    "default": false,
+    "hint": "开启后玩家可用 /applywl 指令申请白名单，每个QQ只能绑定一个MC账号"
   }
 }
