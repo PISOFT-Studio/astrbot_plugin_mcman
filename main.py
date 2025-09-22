@@ -8,7 +8,7 @@ from astrbot.api import logger
 from astrbot.api import AstrBotConfig  # 配置管理
 
 
-class AsyncRcon:
+class AsyncRcon:  # 异步RCON类
     def __init__(self, host: str, port: int, password: str):
         self.host = host
         self.port = port
@@ -50,7 +50,9 @@ def strip_mc_color(text: str) -> str:
     return re.sub(r"§.", "", text)
 
 
-async def rcon_command(host: str, port: int, password: str, command: str) -> str:
+async def rcon_command(
+    host: str, port: int, password: str, command: str
+) -> str:  # 执行rcon命令
     """统一执行任意 RCON 命令"""
     rcon = AsyncRcon(host, port, password)
     await rcon.connect()
@@ -100,18 +102,27 @@ class MyPlugin(Star):
 
     @filter.command("mcwl", desc="MC 白名单管理", alias={"mcwhitelist"})
     async def mcwl(self, event: AstrMessageEvent, o: str, mcname: str = ""):
+        if not self.is_admin(str(event.get_sender_id())):
+            yield event.plain_result("抱歉，你没有权限执行此操作。")
+            return
         command = f"{self.whitelist_command} {o} {mcname}".strip()
         async for msg in self.execute_and_reply(event, command, "白名单管理"):
             yield msg
 
     @filter.command("mcban", desc="MC 黑名单添加")
     async def mcban(self, event: AstrMessageEvent, mcname: str = "", reason: str = ""):
+        if not self.is_admin(str(event.get_sender_id())):
+            yield event.plain_result("抱歉，你没有权限执行此操作。")
+            return
         command = f"ban {mcname} {reason}".strip()
         async for msg in self.execute_and_reply(event, command, "黑名单添加"):
             yield msg
 
     @filter.command("mcpardon", desc="MC 黑名单移除", alias={"mcunban"})
     async def mcpardon(self, event: AstrMessageEvent, mcname: str = ""):
+        if not self.is_admin(str(event.get_sender_id())):
+            yield event.plain_result("抱歉，你没有权限执行此操作。")
+            return
         command = f"pardon {mcname}".strip()
         async for msg in self.execute_and_reply(event, command, "黑名单移除"):
             yield msg
@@ -128,6 +139,9 @@ class MyPlugin(Star):
 
     @filter.command("mckick", desc="MC 踢出指定玩家", alias={"mck"})
     async def mckick(self, event: AstrMessageEvent, mcname: str = "", reason: str = ""):
+        if not self.is_admin(str(event.get_sender_id())):
+            yield event.plain_result("抱歉，你没有权限执行此操作。")
+            return
         command = f"kick {mcname} {reason}".strip()
         async for msg in self.execute_and_reply(event, command, "踢出玩家"):
             yield msg
@@ -140,6 +154,9 @@ class MyPlugin(Star):
         time: str = "",
         reason: str = "",
     ):
+        if not self.is_admin(str(event.get_sender_id())):
+            yield event.plain_result("抱歉，你没有权限执行此操作。")
+            return
         command = f"tempban {mcname} {time} {reason}".strip()
         async for msg in self.execute_and_reply(event, command, "临时封禁"):
             yield msg
@@ -169,7 +186,9 @@ class MyPlugin(Star):
         user_name = event.get_sender_name()
         sender_qq = str(event.get_sender_id())
         named = f"{user_name}({sender_qq})"
-
+        if not self.is_admin(str(event.get_sender_id())):
+            yield event.plain_result("抱歉，你没有权限执行此操作。")
+            return
         if not text:
             yield event.plain_result(f"你好, {named}, 请输入广播信息!")
             return
