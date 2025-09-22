@@ -211,7 +211,7 @@ class MyPlugin(Star):
 
         message = [
             {"text": f"<管理员广播消息>", "color": "green", "underlined": True},
-            {"text": " ", "color": "white"},
+            {"text": " ", "color": "white","underlined": False},
             {"text": text, "color": "yellow"},
         ]
         command = f"tellraw @a {json.dumps(message, ensure_ascii=False)}"
