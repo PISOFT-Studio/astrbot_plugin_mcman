@@ -91,6 +91,7 @@ class MyPlugin(Star):
     def _save_apply_data(self):
         with open(self.apply_file, "w", encoding="utf-8") as f:
             json.dump(self.apply_data, f, ensure_ascii=False, indent=2)
+
     async def initialize(self):
         logger.info("mcman plugin by kdj")
 
@@ -211,8 +212,8 @@ class MyPlugin(Star):
 
         message = [
             {"text": f"<管理员广播消息>", "color": "green", "underlined": True},
-            {"text": " ", "color": "white","underlined": False},
-            {"text": text, "color": "yellow"},
+            {"text": " ", "color": "white", "underlined": False},
+            {"text": text, "color": "yellow", "underlined": False},
         ]
         command = f"tellraw @a {json.dumps(message, ensure_ascii=False)}"
         async for msg in self.execute_and_reply(event, command, "广播消息"):
@@ -237,7 +238,9 @@ class MyPlugin(Star):
         # 调用RCON执行
         command = f"{self.whitelist_command} add {mcname}"
         try:
-            resp = await rcon_command(self.rcon_host, self.rcon_port, self.rcon_password, command)
+            resp = await rcon_command(
+                self.rcon_host, self.rcon_port, self.rcon_password, command
+            )
             self.apply_data[qqid] = mcname
             self._save_apply_data()
             yield event.plain_result(
@@ -245,5 +248,6 @@ class MyPlugin(Star):
             )
         except Exception as e:
             yield event.plain_result(f"申请失败：{e}")
+
     async def terminate(self):
         logger.info("mcman plugin stopped")
