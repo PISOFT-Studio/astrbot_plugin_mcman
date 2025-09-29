@@ -249,5 +249,23 @@ class MyPlugin(Star):
         except Exception as e:
             yield event.plain_result(f"申请失败：{e}")
 
+    @filter.command("mckill", desc="MC kill人")
+    async def mckill(self, event: AstrMessageEvent, mcname: str = ""):
+        if not self.is_admin(str(event.get_sender_id())):
+            yield event.plain_result("抱歉，你没有权限执行此操作。")
+            return
+        command = f"kill {mcname}".strip()
+        async for msg in self.execute_and_reply(event, command, "kill"):
+            yield msg
+
+    @filter.command("mcplugins", desc="MC 插件列表")
+    async def mcplugins(
+        self,
+        event: AstrMessageEvent,
+    ):
+        command = f"plugins".strip()
+        async for msg in self.execute_and_reply(event, command, "插件列表"):
+            yield msg
+
     async def terminate(self):
         logger.info("mcman plugin stopped")
